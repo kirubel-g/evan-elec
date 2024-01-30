@@ -1,4 +1,3 @@
-
 #include <SPI.h>
 #include <mcp_can.h>
 
@@ -136,15 +135,30 @@ int lockout = 0;
 
 
 //cruise
-double Setpoint, Input, Output;
-double Kp = 2, Ki = 5, Kd = 1;
+// double Setpoint, Input, Output;
+// double Kp = 2, Ki = 5, Kd = 1;
+// PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+// float cruiseTorqueCmd = 0;
+// int cruise1 = 0;
+// int cruise2 = 0;
+// int cruiseSet = 0;
+// int cruiseMainOn = 0;
+
+//cruise
+double Setpoint = 100.0; //motor speed we want? value is a placeholder
+double Input = 0; //current motor speed, placeholder value 
+double Output = 0; //desired output, what we are controlling for
+double Kp = 2, Ki = 0, Kd = 0; //tuning parameters...from what I remember from 420, we should start off with a small Kp and zero Ki and Kd
+
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-float cruiseTorqueCmd = 0;
+float cruiseTorqueCmd = 0; //cruise torque calculated from PID loop
 int cruise1 = 0;
 int cruise2 = 0;
-int cruiseSet = 0;
-int cruiseMainOn = 0;
+int cruiseSet = 0; // set button, "off"
+int cruiseMainOn = 0; //main cruise control switch, "off"
 
+unsigned long lastTime;
+double kp = 0, ki = 0, kd = 0;
 
 MCP_CAN CAN(spiCSPinFCAN);  //start talking on FCAN which is motor 1 + all other ECU's
 MCP_CAN CAN2(spiCSPinFCAN2);  //start talking on FCAN2 which is motor 2
@@ -185,7 +199,7 @@ void setup() {
   while (CAN_OK != CAN.begin(CAN_500KBPS, MCP_8MHz))
   {
     Serial.println("FCAN BUS init Failed");
-    delay(100);
+    // delay(100);
   }
   Serial.println("FCAN BUS Shield Init OK!");
 
@@ -194,7 +208,7 @@ void setup() {
   while (CAN_OK != CAN2.begin(CAN_500KBPS, MCP_8MHz))
   {
     Serial.println("FCAN2 BUS init Failed");
-    delay(100);
+    // delay(100);
   }
   Serial.println("FCAN2 BUS Shield Init OK!");
 
@@ -203,12 +217,14 @@ void setup() {
   while (CAN_OK != CAN3.begin(CAN_125KBPS, MCP_8MHz))
   {
     Serial.println("BCAN BUS init Failed");
-    delay(100);
+    // delay(100);
   }
   Serial.println("BCAN BUS Shield Init OK!");
 
-  myPID.SetMode(AUTOMATIC);
-
+  Serial.begin(9600);
+  // Additional setup code
+  myPID.SetMode(MANUAL);  // Set PID mode to MANUAL for tuning
+  // myPID.SetMode(AUTOMATIC);
 
 }
 
@@ -229,8 +245,11 @@ void loop() {
 
   preChargeLoop();
 
-  //cruise();
+  cruise();
 
+  resume();
+
+  // cancel();
 
 
   //CAN RECIEVE on ID 71
@@ -347,8 +366,6 @@ void gears() {
 
 }
 
-
-
 void lights() {
   if (analogRead(brake) < 200) {
     brakeCommand = 1;
@@ -375,8 +392,6 @@ void lights() {
 
 
 }
-
-
 
 void hvac() {
   unsigned char len = 0;
@@ -414,10 +429,6 @@ void hvac() {
     heatReq = 0;
   }
 }
-
-
-
-
 
 void steering() {
 
@@ -462,9 +473,6 @@ void steering() {
   }
 
 }
-
-
-
 
 void power() {
   // Serial.println(pushCount);
@@ -589,7 +597,6 @@ void power() {
 
 }
 
-
 void preChargeLoop() {
 
 
@@ -647,7 +654,6 @@ void preChargeLoop() {
 
 
 }
-
 
 void motah() {
 
@@ -758,7 +764,6 @@ void motah() {
 
 
 }
-
 
 void pedals() {
   //.println(analogRead(app1));  //215 - 975
@@ -879,26 +884,71 @@ void pedals() {
 
 }
 
-
-
 void cruise() {
 
-  if (cruiseMainOn == 1 && vss > 20) {  //cruise on and vss > 20 mph, start calculating
+  // if (cruiseMainOn == 1 && vss > 20) {  //cruise on and vss > 20 mph, start calculating
+  //   Input = vss;
+  //   myPID.Compute();
+  //   cruiseTorqueCmd = map(Output, 0, 255, 0, 100);
+  //   //Serial.println(cruiseTorqueCmd);
+
+  // }
+
+  // if (cruiseSet == 1 && analogRead(brake) > 300 && cruiseMainOn == 1) {  //if cruise set and off the brake pedal
+  //   accelPct = cruiseTorqueCmd;
+  //   accelPct2 = cruiseTorqueCmd;
+  // }
+
+  // if (analogRead(brake) < 200) { //if step on brake, cruise off
+  //   cruiseSet == 0;
+  // }
+
+  // NEW UPDATED CODE 
+  if (cruiseMainOn && vss > 20) {
+    // CC calc for vehicle speed
     Input = vss;
     myPID.Compute();
     cruiseTorqueCmd = map(Output, 0, 255, 0, 100);
+    //Serial.print("Output: ");
     //Serial.println(cruiseTorqueCmd);
-
-  }
-
-  if (cruiseSet == 1 && analogRead(brake) > 300 && cruiseMainOn == 1) {  //if cruise set and off the brake pedal
-    accelPct = cruiseTorqueCmd;
-    accelPct2 = cruiseTorqueCmd;
+    if (analogRead(brake) > 300 && cruiseSet) {
+      accelPct = accelPct2 = cruiseTorqueCmd; // acceleration percentages are set to calculated cruise torque
+      if (cruise1 == 1) {
+        cruise_status = true;
+      }
+    }
+  
   }
 
   if (analogRead(brake) < 200) { //if step on brake, cruise off
-    cruiseSet == 0;
+    cruiseSet = 0; //assignment, not a comparison
+    cruise_status = false;
   }
 
+  //time elapsed since last run
+  unsigned long now = millis();
+  double dt = (now - lastTime) / 1000.0;
 
+  //Ziegler-Nichols method
+  // if (dt > 1.0) {  // Tune every second...arbitrarily selected...subject to change
+  //   myPID.Compute();
+  //   if (Output > 255.0) { // Oscillation detected, recalibrating parameters
+  //     kp = 0.6 * Ku;
+  //     ki = 2 * kp / Pu;
+  //     kd = kp * Pu / 8;
+  //     Serial.println(kp);
+  //     Serial.println(ki);
+  //     Serial.println(kd);
+  //     myPID.SetTunings(kp, ki, kd);
+  //     myPID.SetMode(AUTOMATIC);  // Set PID mode to AUTOMATIC after tuning
+  //     lastTime = now;
+  //   }
+  // }
+
+}
+
+void resume() {
+  if (cruise_status) {
+    Setpoint += 1; //increment desired speed by 1
+  }
 }
