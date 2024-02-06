@@ -441,7 +441,12 @@ void ABS() {
 
 void thermalControl() {
 
+  unsigned long currentMillis = millis();
 
+  if (currentMillis - 0 <= 120000) {
+      highTemp = 20;
+      inTemp = 30; 
+  }
 
   acPressVal = analogRead(acPress);
 
