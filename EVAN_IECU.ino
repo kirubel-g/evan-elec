@@ -17,54 +17,54 @@ unsigned long previousCanSend = 0;   // Variable to store the last send time for
 unsigned long previousCanSend2 = 0;  // Variable to store the last send time for the second CAN controller
 
 // Define pin numbers for various vehicle controls and sensors
-int horn = A1;         // Horn control pin
-int hazRet = A4;       // Hazard lights return pin
+int horn = A1;         // Horn Switch Input
+int hazRet = A4;       // Hazard lights switch pin
 int auxSw1 = A5;       // Auxiliary switch 1
 int auxSw2 = A6;       // Auxiliary switch 2
 int igSw1 = A2;        // Ignition switch 1
 int igSw2 = A3;        // Ignition switch 2
 int app1 = A15;        // Accelerator pedal position sensor 1
 int app2 = A14;        // Accelerator pedal position sensor 2
-int brake = A13;       // Brake sensor
-int lock = A10;        // Door lock control
-int unlock = A9;       // Door unlock control
-int seatBelt = A8;     // Seat belt sensor
+int brake = A13;       // Brake switch
+int lock = A10;        // Lock Command from security ECU
+int unlock = A9;       // Unlock Command from security ECU
+int seatBelt = A8;     // Seat belt switch
 
 // Define pins for vehicle's electrical system components
-int r7 = 42;              // Relay or component connected to pin 42
-int accPow = 47;          // Accessory power control
+int r7 = 42;              // ECU self powering relay
+int accPow = 47;          // Acc power feed
 int illumi = 49;          // Illumination control (e.g., dashboard lights)
-int motPow = 5;           // Motor power control
+int motPow = 5;           // Power to inverters
 int contactorPos = 45;    // Positive contactor for the main battery or motor
 int contactorNeg = 43;    // Negative contactor for the main battery or motor
 int precharge = 4;        // Precharge circuit control
 int dashPow = 6;          // Dashboard power control
-int revSig = 46;          // Reverse signal control
+int revSig = 46;          // Reverse signal to radio for backup camera
 
 // Variables for ignition and security logic
 int pushCount = 0;      // Counter for push button presses
 int keyOn = 0;          // State variable indicating if the key is in the "On" position
 int security = 0;       // Security or authentication state
-int IECUshutdown = 0;   // Flag indicating if the Intelligent Electronic Control Unit (IECU) should shut down
+int IECUshutdown = 0;   // Flag indicating if the Interior Electronic Control Unit (IECU) should shut down
 int genericFlag1 = 0;   // A generic flag for extending logic as needed
-int ignite = 0;         // State indicating if ignition has occurred
+int ignite = 0;         // Variable for ignition sw
 int holdECUOn = 0;      // Flag to keep the ECU powered on, regardless of other conditions
-int igState = 0;        // State of the ignition system
+int igState = 0;        // Tells what power mode state vehicle is in
 int igSwitch1 = 0;      // State of ignition switch 1
 int igSwitch2 = 0;      // State of ignition switch 2
-int br = 0;             // Brake state or sensor reading
+int br = 0;             // Brake Switch raw reading 
 
 
 // Timing variables for button presses and IECU operation
 unsigned long pushTimer = 0;  // Timer for tracking duration of button presses
-unsigned long IECUtimer = 0;  // Timer for tracking IECU operation time
+unsigned long IECUtimer = 0;  // Timer for tracking IECU shutdown
 
 // Steering control and data
 int i = 0;  // Generic counter or index variable
 int j = 0;  // Another generic counter or index variable
 int counter = 0;  // Counter for looping or iterative operations
-unsigned char stmp202[8] = {0x30, 0x03, 0, 0x00, 0x00, 0, 0x19, 0x93}; // Data array for Tachometer CAN message
-unsigned char stmp2170[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD0, 0xFC}; // Data array for Steering Wheel/Vehicle Speed Sensor (VSS) CAN message
+unsigned char stmp202[8] = {0x30, 0x03, 0, 0x00, 0x00, 0, 0x19, 0x93}; // Data array for Tachometer and VSS sig to eps
+unsigned char stmp2170[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD0, 0xFC}; // Data array for emulation of Mazda VSA module for eps opperation
 unsigned long lastSend = 0;  // Timestamp for last CAN message sent
 
 // Climate control variables
