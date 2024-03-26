@@ -31,14 +31,16 @@ int igState = 0;    // Ignition state
 // Lamp control variables
 // (These variables are used to control various lamps)
 // Lamp control variables
-int lamps1 = 0;                 // State of lamps group 1
-int lamps2 = 0;                 // State of lamps group 2
+int lamps1 = 0;                 // Bytes containing the specific bits which enocde all of the lamp commands same for wipers 1 and 2
+int lamps2 = 0;                 // Bytes containing the specific bits which enocde all of the lamp commands same for wipers 1 and 2
+
+
 int leftCommand = 0;            // Left turn signal command
 int rightCommand = 0;           // Right turn signal command
 int brakeCommand = 0;           // Brake signal command
 int brakeOn = 0;                // Status of brake signal
-int blinking1 = 0;              // State of blinking group 1
-int blinking2 = 0;              // State of blinking group 2
+int blinking1 = 0;              // State of Blinking Left
+int blinking2 = 0;              // State of Blinking Right
 unsigned long blinktime2 = 0;   // Time of last blink for group 2
 unsigned long previousBlink2 = 0; // Previous blink time for group 2
 int rightFrontBlink = 0;        // State of right front blinker
@@ -71,8 +73,8 @@ int wiperDelayNew = 0;     // New wiper delay value
 int wiperHighOn = 0;       // Status of high-speed wiper
 int wiperLowOn = 0;        // Status of low-speed wiper
 int oktoshutoff = 0;       // OK to shut off wipers
-int lowBit = 0;            // Low-speed wiper bit
-int highBit = 0;           // High-speed wiper bit
+int lowBit = 0;            // Wiper commands
+int highBit = 0;           // Wiper commands
 
 // Wiper timing variables (in milliseconds)
 unsigned long wiperTimer0 = 0; // Timer for wiper action
