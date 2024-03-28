@@ -108,6 +108,7 @@ int k = 0;
 int counter = 0;
 byte var = 0;
 
+// Hard coded CAN frame messages to still be sent
 unsigned char stmp78[8] = {0xDF, 0x3C, 0xFF, 0xE0, 0x98, 0xC0, 0x00, 0x00};
 unsigned char stmp79[8] = {0xDF, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 unsigned char stmp86[8] = {0x3E, 0x83, 0x81, 0x5B, 0xE9, 0x98, 0x08, 0x00};
@@ -811,6 +812,7 @@ void wipers() {
  * Function: bsmValues
  * ----------------------------
  * This function updates various BSM (Blind Spot Monitoring) values based on different conditions.
+ * Checks for the geat state and and in the approapiote blink flag for a send CAN message
  * 
  */
 void bsmValues() {
@@ -862,9 +864,6 @@ void bsmValues() {
   stmp202[2] = (vssRaw >> 8) & 0xFF;  // Most significant byte
   stmp202[3] = vssRaw & 0xFF;          // Least significant byte
 
-
-
-
   if (leftCommand == 1) {
     stmp91[1] = 0x20;
   }
@@ -872,12 +871,17 @@ void bsmValues() {
     stmp91[1] = 0x10;
   }
 
-
-
-
 }
 
 
+
+/*
+ * Function: bsm
+ * ----------------------------
+ * Checks to see if a CAN message is sent
+ * Parses the CAN message to set the approperiate bits for the bsm warning state
+ * Sends a new CAN frame message out every milliseconds
+ */
 void bsm() {
 
 
@@ -1123,6 +1127,13 @@ void bsm() {
   }
 }
 
+
+/*
+ * Function: shutdownSeq
+ * ----------------------------
+ * This turns off all the intiialization. Sets the Wiper, left, and right turn lights to LOW
+ * Sets the delay of the timer counter 
+ */
 void shutdownSeq() {
 
   digitalWrite(leftTurn, LOW);
