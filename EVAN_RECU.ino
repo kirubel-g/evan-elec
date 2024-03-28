@@ -254,6 +254,9 @@ void setup() {
  * ----------------------------
  * This function is called repeatedly in a loop after the setup function.
  * It controls the behavior of various vehicle functions based on input conditions.
+ * Checks if the iginition state is ON. Delay if the lights are not ON.
+ * Checks for the status varaibles and turns ON/OFF of their associated pins
+ * Waits to receive a CAN Frame message and parses the message for further detailed functions*
  */
 void loop() {
 
