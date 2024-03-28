@@ -675,7 +675,9 @@ void wipers() {
   }
 
 
-
+  /*
+  * Set the appropriate wiper dealy squence
+  */
 
 
   if (wipers2 == 0x5A) {  //determine delay setting
@@ -1203,8 +1205,8 @@ void shutdownSeq() {
   wiperHighOn = 0;
   wiperLowOn = 0;
   oktoshutoff = 0;
-  lowBit = 0;
-  highBit = 0;
+  lowBit = 0;             // wiper commands (i.e. they include the delay command too)
+  highBit = 0;            // // wiper commands (i.e. they include the delay command too)
 
   wiperTimer0 = 0;
   wiperTimer1 = -15000;
