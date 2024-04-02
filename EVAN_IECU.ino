@@ -1,10 +1,13 @@
 
 // Include the SPI library for SPI communication
-#include <SPI.h>
+#include <SPI.h> /*(SPI) is a communication interface used to send data between multiple devices. These devices are organized into a master and slave configuration, 
+in which the master has control over the slaves and the slaves receive instruction from the master.*/
 // Include the mcp_can library for CAN bus communication
-#include <mcp_can.h>
+#include <mcp_can.h> /*The Controller Area Network (CAN bus) is the nervous system, enabling communication. In turn, (ECUs) are like parts of the body, 
+interconnected via the CAN bus. Information sensed by one part can be shared with another.*/
 // Include the PID_v1 library for PID control
-#include <PID_v1.h>
+#include <PID_v1.h> /* PID loop calculates an 'error' value as the difference between a measured process variable and a desired setpoint. 
+The controller then seeks to minimize this error over time by adjusting control variables.*/
 
 // Define constants for the SPI Chip Select (CS) pins used for the CAN controllers
 const int spiCSPinFCAN = 35;  // Chip Select pin for the first CAN controller
@@ -79,8 +82,8 @@ int fan = 0;        // Fan speed level
 int brakeCommand = 0;    // Command to activate/deactivate brake lights
 int hazCommand = 0;      // Command to activate/deactivate hazard lights
 int hornCommand = 0;     // Command to activate/deactivate the horn
-int leftBlink = 0;       // Command for left blinker
-int rightBlink = 0;      // Command for right blinker
+int leftBlink = 0;       // Command for left blinker (on/off)
+int rightBlink = 0;      // Command for right blinker (on/off)
 int headlampOn = 0;      // Headlamp status (on/off)
 int highbeamOn = 0;      // High beam status (on/off)
 int parkLampsOn = 0;     // Parking lamps status (on/off)
@@ -316,7 +319,7 @@ void loop() {
   unsigned char buf[8];
   unsigned long canId = 0;
 
-  if (CAN_MSGAVAIL == CAN.checkReceive()) {
+  if (CAN_MSGAVAIL == CAN.checkReceive()) { //check CAN Message
     CAN.readMsgBuf(&len, buf);       // Read the CAN message
     canId = CAN.getCanId();          // Get the CAN ID
   }
@@ -359,7 +362,7 @@ if (canId == 0x105) {
   motorDat1 = buf[5]; // Store the sixth byte as motor data
   // Decode motor rotation direction from motorDat1
   if ((motorDat1 & 0b10000000)) {    // Check the first bit for rotation direction
-    motorRotation = 2;
+    motorSpeed = 2;
   }
   if ((motorDat1 & 0b01000000)) {    // Check the second bit for rotation direction
     motorRotation = 1;
@@ -873,7 +876,7 @@ void motah() {
     maxChrgRaw = (maxChrg + 500) * 10;
 
     // Prepares a CAN message with maximum discharge and charge values.
-    unsigned char stmp1[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned char stmp1[8] = {0, 0, 0, 0, 0, 0, 0, 0};//stmp1[8] is can array with 8 values
     stmp1[0] = static_cast<char>((maxDiscRaw >> 8) & 0xFF);
     stmp1[1] = static_cast<char>(maxDiscRaw & 0xFF);
     stmp1[2] = static_cast<char>((maxChrgRaw >> 8) & 0xFF);
